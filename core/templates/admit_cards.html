@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>🎫 Latest Admit Cards</h2>
+    {% for card in cards %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ card.title }}</h5>
+                {% if card.exam_date %}
+                    <p><strong>Exam Date:</strong> {{ card.exam_date }}</p>
+                {% endif %}
+                <a href="{{ card.download_link }}" class="btn btn-primary" target="_blank">Download Admit Card</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No admit cards available.</p>
+    {% endfor %}
+</div>
+{% endblock %}

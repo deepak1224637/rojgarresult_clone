@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>📚 Exam Syllabus</h2>
+    {% for s in syllabi %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ s.exam_name }}</h5>
+                <a href="{{ s.syllabus_pdf }}" class="btn btn-info" target="_blank">Download Syllabus PDF</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No syllabus available.</p>
+    {% endfor %}
+</div>
+{% endblock %}
