@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Home - RojgarResult{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- ✅ Dynamic Colorful Buttons -->
+    <div class="row g-2 text-center mb-4">
+        {% for post in highlights %}
+            <div class="col-6 col-md-3">
+                <a href="{{ post.link }}" target="_blank"
+                   class="btn w-100 text-white fw-bold"
+                   style="background-color: var(--bs-{{ post.bg_color }});">
+                   {{ post.title }} ({{ post.post_count }} Posts)
+                </a>
+            </div>
+        {% empty %}
+            <p>No highlight posts available.</p>
+        {% endfor %}
+    </div>
+
+    <!-- ✅ 3-Column Section -->
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="p-3 bg-danger text-white fw-bold text-center">Results</div>
+            <div class="p-3 border">
+                {% for result in results|slice:":5" %}
+                    <p><a href="{{ result.result_link }}" target="_blank">{{ result.title }}</a></p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="p-3 bg-danger text-white fw-bold text-center">Admit Cards</div>
+            <div class="p-3 border">
+                {% for card in cards|slice:":5" %}
+                    <p><a href="{{ card.download_link }}" target="_blank">{{ card.title }}</a></p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="p-3 bg-danger text-white fw-bold text-center">Latest Jobs</div>
+            <div class="p-3 border">
+                {% for job in jobs|slice:":5" %}
+                    <p><a href="{{ job.apply_link }}" target="_blank">{{ job.title }}</a></p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

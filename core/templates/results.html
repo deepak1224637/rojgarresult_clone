@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>📢 Exam Results</h2>
+    {% for res in results %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ res.title }}</h5>
+                {% if res.result_date %}<p><strong>Result Date:</strong> {{ res.result_date }}</p>{% endif %}
+                <a href="{{ res.result_link }}" class="btn btn-success" target="_blank">View Result</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No results found.</p>
+    {% endfor %}
+</div>
+{% endblock %}
