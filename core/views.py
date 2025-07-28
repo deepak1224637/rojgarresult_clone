@@ -1,9 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect , get_object_or_404
 from .models import JobPost , AdmitCard, Result, Syllabus,HighlightPost
 from datetime import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from .forms import JobPostForm
+
+from .models import AdmitCard
+from .forms import AdmitCardForm
+
+
 #from.models import AdmitPost
 
 def home(request):
@@ -58,6 +64,83 @@ def dashboard_home(request):
     return render(request, 'dashboard/dashboard_home.html')
 
 
+# @login_required
+# def manage_jobs(request):
+#     jobs = JobPost.objects.all().order_by('-posted_on')  # Latest first
+#     return render(request, 'dashboard/manage_jobs.html', {'jobs': jobs})
+
 @login_required
 def manage_jobs(request):
-    return render(request, 'dashboard/manage_jobs.html')
+    jobs = JobPost.objects.all().order_by('-posted_on')
+
+    if request.method == 'POST':
+        form = JobPostForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_jobs')
+    else:
+        form = JobPostForm()
+
+    return render(request, 'dashboard/manage_jobs.html', {
+        'jobs': jobs,
+        'form': form
+    })
+
+
+
+# EDIT
+@login_required
+def edit_job(request, job_id):
+    job = get_object_or_404(JobPost, id=job_id)
+    if request.method == 'POST':
+        form = JobPostForm(request.POST, instance=job)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_jobs')
+    else:
+        form = JobPostForm(instance=job)
+    return render(request, 'dashboard/edit_job.html', {'form': form, 'job': job})
+
+# DELETE
+@login_required
+def delete_job(request, job_id):
+    job = get_object_or_404(JobPost, id=job_id)
+    job.delete()
+    return redirect('manage_jobs')
+
+
+
+
+
+
+@login_required
+def manage_admit_cards(request):
+    cards = AdmitCard.objects.all().order_by('-created_on')
+
+    if request.method == 'POST':
+        form = AdmitCardForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_admit_cards')
+    else:
+        form = AdmitCardForm()
+
+    return render(request, 'dashboard/manage_admit_cards.html', {
+        'form': form,
+        'cards': cards
+    })
+
+@login_required
+def edit_admit_card(request, card_id):
+    card = get_object_or_404(AdmitCard, id=card_id)
+    form = AdmitCardForm(request.POST or None, instance=card)
+    if form.is_valid():
+        form.save()
+        return redirect('manage_admit_cards')
+    return render(request, 'dashboard/edit_admit_card.html', {'form': form, 'card': card})
+
+@login_required
+def delete_admit_card(request, card_id):
+    card = get_object_or_404(AdmitCard, id=card_id)
+    card.delete()
+    return redirect('manage_admit_cards')

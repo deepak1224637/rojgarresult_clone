@@ -18,6 +18,7 @@ class AdmitCard(models.Model):
     title = models.CharField(max_length=200)
     exam_date = models.DateField(null=True, blank=True)
     download_link = models.URLField()
+    date_published = models.DateField(null=True, blank=True)
     posted_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

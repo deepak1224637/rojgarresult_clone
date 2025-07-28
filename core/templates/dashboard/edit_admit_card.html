@@ -1,0 +1,14 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% block title %}Edit Admit Card{% endblock %}
+{% block content %}
+
+<h3>Edit Admit Card - {{ card.title }}</h3>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{% url 'manage_admit_cards' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}
