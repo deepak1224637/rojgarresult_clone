@@ -1,6 +1,52 @@
 {% extends "dashboard/dashboard_base.html" %}
 {% block title %}Manage Job Posts{% endblock %}
 {% block content %}
-<h3>Manage Job Posts</h3>
-<p>Yahan se job post add/edit/delete karenge (coming soon...)</p>
+
+<h3 class="mb-3">Manage Job Posts</h3>
+
+<!-- ✅ Add New Job Post Form -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">Add New Job</div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Add Job</button>
+        </form>
+    </div>
+</div>
+
+<!-- ✅ Job List Table -->
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Apply Link</th>
+            <th>Last Date</th>
+            <th>Posted On</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for job in jobs %}
+        <tr>
+            <td>{{ job.id }}</td>
+            <td>{{ job.title }}</td>
+            <td><a href="{{ job.apply_link }}" target="_blank">Apply</a></td>
+            <td>{{ job.last_date }}</td>
+            <td>{{ job.posted_on|date:"d M Y H:i" }}</td>
+
+            <td>
+    <a href="{% url 'edit_job' job.id %}" class="btn btn-sm btn-warning">Edit</a>
+    <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-danger"
+       onclick="return confirm('Are you sure to delete this job?');">Delete</a>
+</td>
+
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No job posts available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}
