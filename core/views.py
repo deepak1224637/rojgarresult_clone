@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import JobPostForm
+from .forms import JobPostForm, ResultForm , HighlightPostForm
 
 from .models import AdmitCard
 from .forms import AdmitCardForm
@@ -115,7 +115,7 @@ def delete_job(request, job_id):
 
 @login_required
 def manage_admit_cards(request):
-    cards = AdmitCard.objects.all().order_by('-created_on')
+    cards = AdmitCard.objects.all().order_by('-posted_on')
 
     if request.method == 'POST':
         form = AdmitCardForm(request.POST)
@@ -144,3 +144,64 @@ def delete_admit_card(request, card_id):
     card = get_object_or_404(AdmitCard, id=card_id)
     card.delete()
     return redirect('manage_admit_cards')
+
+@login_required
+def manage_results(request):
+    results = Result.objects.all().order_by('-posted_on')
+    if request.method == 'POST':
+        form = ResultForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_results')
+    else:
+        form = ResultForm()
+    return render(request, 'dashboard/manage_results.html', {'form': form, 'results': results})
+
+@login_required
+def edit_result(request, result_id):
+    result = get_object_or_404(Result, id=result_id)
+    form = ResultForm(request.POST or None, instance=result)
+    if form.is_valid():
+        form.save()
+        return redirect('manage_results')
+    return render(request, 'dashboard/edit_result.html', {'form': form, 'results': results})
+
+@login_required
+def delete_result(request, result_id):
+    result = get_object_or_404(Result, id=result_id)
+    result.delete()
+    return redirect('manage_results')
+
+
+@login_required
+def manage_highlights(request):
+    highlights = HighlightPost.objects.all().order_by('-posted_on')
+    if request.method == 'POST':
+        form = HighlightPostForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_highlights')
+    else:
+        form = HighlightPostForm()
+    return render(request, 'dashboard/manage_highlights.html', {
+        'form': form,
+        'highlights': highlights
+    })
+
+@login_required
+def edit_highlight(request, highlight_id):
+    highlight = get_object_or_404(HighlightPost, id=highlight_id)
+    form = HighlightPostForm(request.POST or None, instance=highlight)
+    if form.is_valid():
+        form.save()
+        return redirect('manage_highlights')
+    return render(request, 'dashboard/edit_highlight.html', {'form': form, 'highlight': highlight})
+
+@login_required
+def delete_highlight(request, highlight_id):
+    highlight = get_object_or_404(HighlightPost, id=highlight_id)
+    highlight.delete()
+    return redirect('manage_highlights')
+
+
+

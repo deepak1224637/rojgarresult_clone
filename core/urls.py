@@ -20,6 +20,15 @@ urlpatterns = [
     path('dashboard/admit-cards/edit/<int:card_id>/', views.edit_admit_card, name='edit_admit_card'),
     path('dashboard/admit-cards/delete/<int:card_id>/', views.delete_admit_card, name='delete_admit_card'),
 
+    path('dashboard/results/', views.manage_results, name='manage_results'),
+    path('dashboard/results/edit/<int:result_id>/', views.edit_result, name='edit_result'),
+    path('dashboard/results/delete/<int:result_id>/', views.delete_result, name='delete_result'),
+
+
+    path('dashboard/highlights/', views.manage_highlights, name='manage_highlights'),
+    path('dashboard/highlights/edit/<int:highlight_id>/', views.edit_highlight, name='edit_highlight'),
+    path('dashboard/highlights/delete/<int:highlight_id>/', views.delete_highlight, name='delete_highlight'),
+
 
     
 ]
