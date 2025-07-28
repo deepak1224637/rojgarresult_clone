@@ -1,0 +1,56 @@
+{% extends 'dashboard/dashboard_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Highlight Posts</h2>
+
+    <!-- Add Form -->
+    <div class="card mb-4">
+        <div class="card-header">Add New Highlight</div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group mb-2">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                </div>
+                <div class="form-group mb-2">
+                    {{ form.content.label_tag }}
+                    {{ form.content }}
+                </div>
+                <button type="submit" class="btn btn-success">Add Highlight</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-header">All Highlights</div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Posted On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for highlight in highlights %}
+                    <tr>
+                        <td>{{ highlight.title }}</td>
+                        <td>{{ highlight.posted_on }}</td>
+                        <td>
+                            <a href="{% url 'edit_highlight' highlight.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="{% url 'delete_highlight' highlight.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3">No highlights found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

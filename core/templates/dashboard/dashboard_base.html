@@ -9,7 +9,13 @@
 <nav class="navbar navbar-dark bg-dark px-4">
     <a class="navbar-brand" href="/dashboard/">Admin Dashboard</a>
     <div>
-        <a href="/dashboard/jobs/" class="btn btn-sm btn-light">Jobs</a>
+        <a href="{% url 'manage_jobs' %}" class="btn btn-sm btn-light">Jobs</a>
+<a href="{% url 'manage_admit_cards' %}" class="btn btn-sm btn-light">Admit Cards</a>
+<a href="{% url 'manage_results' %}" class="btn btn-sm btn-light">Results</a>
+<a href="{% url 'manage_highlights' %}" class="btn btn-sm btn-light">Highlights</a>
+
+
+
         <a href="/dashboard/logout/" class="btn btn-sm btn-danger">Logout</a>
     </div>
 </nav>

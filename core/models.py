@@ -59,3 +59,12 @@ class HighlightPost(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+class HighlightPost(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    posted_on =models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
