@@ -4,7 +4,9 @@
 
 <div class="container mt-4">
 
-    <!-- ✅ Dynamic Colorful Buttons -->
+
+ 
+    <!-- ✅ Highlights -->
     <div class="row g-2 text-center mb-4">
         {% for post in highlights %}
             <div class="col-6 col-md-3">
@@ -19,7 +21,7 @@
         {% endfor %}
     </div>
 
-    <!-- ✅ 3-Column Section -->
+    <!-- ✅ Results / Admit Cards / Job Preview -->
     <div class="row mt-4">
         <div class="col-md-4 mb-4">
             <div class="p-3 bg-danger text-white fw-bold text-center">Results</div>
@@ -43,11 +45,51 @@
             <div class="p-3 bg-danger text-white fw-bold text-center">Latest Jobs</div>
             <div class="p-3 border">
                 {% for job in jobs|slice:":5" %}
-                    <p><a href="{{ job.apply_link }}" target="_blank">{{ job.title }}</a></p>
+                    {% comment %} <p><a href="{{ job.apply_link }}" target="_blank">{{ job.title }}</a></p> {% endcomment %}
+                    <p><a href="{% url 'job_detail' job.id %}">{{ job.title }}</a></p>
+
                 {% endfor %}
             </div>
         </div>
     </div>
 
+    <!-- ✅ Paginated Job Listings -->
+    <h3 class="mt-5 mb-3">All Job Posts</h3>
+    {% for job in page_obj %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ job.title }}</h5>
+                <p class="card-text">{{ job.description|truncatewords:25 }}</p>
+                <a href="{{ job.apply_link }}" target="_blank" class="btn btn-success">Apply Now</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No jobs found.</p>
+    {% endfor %}
+
+    <!-- ✅ Pagination -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
 </div>
+
 {% endblock %}
