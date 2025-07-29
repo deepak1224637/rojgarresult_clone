@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2 class="text-center text-danger">{{ job.title }}</h2>
+
+  <p class="text-muted text-center">Published on: {{ job.posted_on|date:"d M, Y" }}</p>
+
+  <hr>
+
+  <div>
+    <h4 class="text-success">Short Description:</h4>
+    <p>{{ job.description|linebreaks }}</p>
+  </div>
+
+  {% if job.how_to_apply %}
+  <div>
+    <h4 class="text-primary">How to Apply:</h4>
+    <p>{{ job.how_to_apply|linebreaks }}</p>
+  </div>
+  {% endif %}
+
+  {% if job.important_dates %}
+  <div>
+    <h4 class="text-success">Important Dates:</h4>
+    <p>{{ job.important_dates|linebreaks }}</p>
+  </div>
+  {% endif %}
+
+  {% if job.eligibility %}
+  <div>
+    <h4 class="text-success">Eligibility Details:</h4>
+    <p>{{ job.eligibility|linebreaks }}</p>
+  </div>
+  {% endif %}
+
+  {% if job.age_limit %}
+  <div>
+    <h4 class="text-success">Age Limit:</h4>
+    <p>{{ job.age_limit|linebreaks }}</p>
+  </div>
+  {% endif %}
+
+  {% if job.total_posts %}
+  <div>
+    <h4 class="text-success">Total Posts:</h4>
+    <p>{{ job.total_posts }}</p>
+  </div>
+  {% endif %}
+
+  {% if job.important_links %}
+  <div>
+    <h4 class="text-success">Important Links:</h4>
+    <p>{{ job.important_links|linebreaks }}</p>
+  </div>
+  {% endif %}
+
+  <div class="text-center my-4">
+    <a href="{{ job.apply_link }}" class="btn btn-lg btn-primary" target="_blank">Apply Online</a>
+  </div>
+</div>
+
+{% endblock %}

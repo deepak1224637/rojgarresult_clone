@@ -28,6 +28,8 @@ urlpatterns = [
     path('dashboard/highlights/', views.manage_highlights, name='manage_highlights'),
     path('dashboard/highlights/edit/<int:highlight_id>/', views.edit_highlight, name='edit_highlight'),
     path('dashboard/highlights/delete/<int:highlight_id>/', views.delete_highlight, name='delete_highlight'),
+    path('job/<int:job_id>/', views.job_detail, name='job_detail'),
+    path('subscribe/', views.subscribe, name='subscribe'),
 
 
     

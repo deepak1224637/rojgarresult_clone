@@ -5,21 +5,45 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import JobPostForm, ResultForm , HighlightPostForm
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 from .models import AdmitCard
 from .forms import AdmitCardForm
+from .forms import SubscriberForm
+from django.contrib import messages
+from django.core.mail import send_mail
+from .models import Subscriber
+from .utils import send_notification
+import os
 
 
 #from.models import AdmitPost
 
 def home(request):
+    query = request.GET.get('q')  # 🔍 Search query
+      # 🔍 Filter jobs based on search
+    if query:
+        jobs = JobPost.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        ).order_by('-posted_on')
+    else:
+        jobs = JobPost.objects.all().order_by('-posted_on')
+
+         # 📄 Pagination (5 jobs per page)
+    paginator = Paginator(jobs, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     jobs = JobPost.objects.all().order_by('-posted_on')
     jobs = JobPost.objects.all().order_by('-posted_on')
     cards = AdmitCard.objects.all().order_by('-posted_on')
     results = Result.objects.all().order_by('-posted_on')
     highlights = HighlightPost.objects.all().order_by('-posted_on')
     return render(request, 'home.html',
-                  {'jobs':jobs,
+                  { 'page_obj': page_obj,
+                   'query': query,
+                   'jobs':jobs,
                    'cards': cards,
                    'results': results,
                    'highlights': highlights,
@@ -77,6 +101,11 @@ def manage_jobs(request):
         form = JobPostForm(request.POST)
         if form.is_valid():
             form.save()
+              # ✅ Send email notification to all subscribers
+            emails = Subscriber.objects.values_list('email', flat=True)
+            subject = f"🆕 New Job Posted: {job.title}"
+            message = f"New job is now live: {job.title}\nApply here: {job.apply_link}"
+            send_notification(subject, message, list(emails))
             return redirect('manage_jobs')
     else:
         form = JobPostForm()
@@ -204,4 +233,29 @@ def delete_highlight(request, highlight_id):
     return redirect('manage_highlights')
 
 
+# core/views.py
+def job_detail(request, job_id):
+    job = get_object_or_404(JobPost, id=job_id)
+    return render(request, 'job_detail.html', {'job': job})
 
+
+def subscribe(request):
+    if request.method == 'POST':
+        form = SubscriberForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Subscribed successfully!")
+        else:
+            messages.error(request, "You are already subscribed or invalid email.")
+    return redirect('home')  # Replace with your homepage URL name
+
+def notify_subscribers(subject, message):
+    subscribers = Subscriber.objects.all()
+    for subscriber in subscribers:
+        send_mail(
+            subject,
+            message,
+            os.getenv("EMAIL_HOST_USER"),
+            [subscriber.email],
+            fail_silently=True,
+        )
