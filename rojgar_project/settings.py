@@ -42,7 +42,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
-print("DEBUG - ALLOWED_HOSTS from env:", ALLOWED_HOSTS)
+#print("DEBUG - ALLOWED_HOSTS from env:", ALLOWED_HOSTS)
 
 
 
@@ -157,3 +157,4 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_URL = '/dashboard/login/'
