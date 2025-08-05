@@ -42,6 +42,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
+print("DEBUG - ALLOWED_HOSTS from env:", ALLOWED_HOSTS)
 
 
 
