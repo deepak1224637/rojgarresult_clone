@@ -9,7 +9,10 @@
                 {% if card.exam_date %}
                     <p><strong>Exam Date:</strong> {{ card.exam_date }}</p>
                 {% endif %}
-                <a href="{{ card.download_link }}" class="btn btn-primary" target="_blank">Download Admit Card</a>
+                {% comment %} <a href="{{ card.download_link }}" class="btn btn-primary" target="_blank">Download Admit Card</a>
+                 {% endcomment %}
+                 <a href="{% url 'admit_card_detail' card.id %}" class="btn btn-info">View Details</a>
+
             </div>
         </div>
     {% empty %}

@@ -15,14 +15,15 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from .models import Subscriber
 from .utils import send_notification
+from .models import Result
 import os
 
 
-#from.models import AdmitPost
+
 
 def home(request):
-    query = request.GET.get('q')  # 🔍 Search query
-      # 🔍 Filter jobs based on search
+    query = request.GET.get('q')  #  Search query
+      #  Filter jobs based on search
     if query:
         jobs = JobPost.objects.filter(
             Q(title__icontains=query) | Q(description__icontains=query)
@@ -30,7 +31,7 @@ def home(request):
     else:
         jobs = JobPost.objects.all().order_by('-posted_on')
 
-         # 📄 Pagination (5 jobs per page)
+         #  Pagination (5 jobs per page)
     paginator = Paginator(jobs, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -101,7 +102,8 @@ def manage_jobs(request):
         form = JobPostForm(request.POST)
         if form.is_valid():
             form.save()
-              # ✅ Send email notification to all subscribers
+
+              # Send email notification to all subscribers
             emails = Subscriber.objects.values_list('email', flat=True)
             subject = f"🆕 New Job Posted: {job.title}"
             message = f"New job is now live: {job.title}\nApply here: {job.apply_link}"
@@ -233,7 +235,7 @@ def delete_highlight(request, highlight_id):
     return redirect('manage_highlights')
 
 
-# core/views.py
+
 def job_detail(request, job_id):
     job = get_object_or_404(JobPost, id=job_id)
     return render(request, 'job_detail.html', {'job': job})
@@ -247,7 +249,7 @@ def subscribe(request):
             messages.success(request, "Subscribed successfully!")
         else:
             messages.error(request, "You are already subscribed or invalid email.")
-    return redirect('home')  # Replace with your homepage URL name
+    return redirect('home')  
 
 def notify_subscribers(subject, message):
     subscribers = Subscriber.objects.all()
@@ -259,3 +261,15 @@ def notify_subscribers(subject, message):
             [subscriber.email],
             fail_silently=True,
         )
+
+
+def subscribe_view(request):
+    return render(request, 'subscribe.html')
+
+def admit_card_detail(request, pk):
+    card = get_object_or_404(AdmitCard, pk=pk)
+    return render(request, 'admit_card_detail.html', {'card': card})
+
+# def result_detail(request, result_id):
+#     result = get_object_or_404(Result, id=result_id)
+#     return render(request, 'result_detail.html', {'result': result})

@@ -7,6 +7,7 @@ urlpatterns = [
     path('results/', views.results, name='results'),
     path('syllabus/', views.syllabus, name='syllabus'),
     path('contact/', views.contact, name='contact'),
+    path('subscribe/', views.subscribe_view, name='subscribe'),
 
     path('dashboard/login/', views.dashboard_login, name='dashboard_login'),
     path('dashboard/logout/', views.dashboard_logout, name='dashboard_logout'),
@@ -31,6 +32,8 @@ urlpatterns = [
     path('job/<int:job_id>/', views.job_detail, name='job_detail'),
     path('subscribe/', views.subscribe, name='subscribe'),
 
+    path('admit-card/<int:pk>/', views.admit_card_detail, name='admit_card_detail'),
+   # path('result/<int:result_id>/', views.result_detail, name='result_detail'),
 
-    
+   
 ]

@@ -6,7 +6,7 @@
 
 
  
-    <!-- ✅ Highlights -->
+    <!--  Highlights -->
     <div class="row g-2 text-center mb-4">
         {% for post in highlights %}
             <div class="col-6 col-md-3">
@@ -21,7 +21,7 @@
         {% endfor %}
     </div>
 
-    <!-- ✅ Results / Admit Cards / Job Preview -->
+    <!--  Results / Admit Cards / Job Preview -->
     <div class="row mt-4">
         <div class="col-md-4 mb-4">
             <div class="p-3 bg-danger text-white fw-bold text-center">Results</div>
@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    <!-- ✅ Paginated Job Listings -->
+    <!--  Paginated Job Listings -->
     <h3 class="mt-5 mb-3">All Job Posts</h3>
     {% for job in page_obj %}
         <div class="card mb-3">
@@ -67,7 +67,7 @@
         <p>No jobs found.</p>
     {% endfor %}
 
-    <!-- ✅ Pagination -->
+    <!--  Pagination -->
     <nav>
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
