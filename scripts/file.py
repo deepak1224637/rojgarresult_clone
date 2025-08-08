@@ -38,17 +38,34 @@ def fetch_home_links():
     return links
 
 
+def filter_links(links, keywords):
+    return [(t, l) for t, l in links if any(k in t.lower() for k in keywords)]
+
 def filter_jobs(links):
-    job_keywords = ["recruitment", "online form", "vacancy"]
-    return [(t, l) for t, l in links if any(k in t.lower() for k in job_keywords)]
+    return filter_links(links, ["recruitment", "online form", "vacancy"])
 
 def filter_admit_cards(links):
-    admit_keywords = ["admit card", "hall ticket", "call letter"]
-    return [(t, l) for t, l in links if any(k in t.lower() for k in admit_keywords)]
+    return filter_links(links, ["admit card", "hall ticket", "call letter"])
 
 def filter_results(links):
-    result_keywords = ["result", "final list", "merit list"]
-    return [(t, l) for t, l in links if any(k in t.lower() for k in result_keywords)]
+    return filter_links(links, ["result", "final list", "merit list"])
+
+
+def get_official_link(detail_url):
+    """Open the rojgarresult detail page and extract official link if present."""
+    try:
+        res = requests.get(detail_url, timeout=10)
+        res.raise_for_status()
+    except Exception as e:
+        print(f"⚠️ Failed to fetch {detail_url}: {e}")
+        return detail_url
+
+    soup = BeautifulSoup(res.content, "html.parser")
+    for a in soup.select("a[href]"):
+        href = a.get("href")
+        if href and not href.startswith(BASE_URL):  # External link
+            return href
+    return detail_url
 
 
 def preview_data(category, data):
@@ -62,23 +79,25 @@ def preview_data(category, data):
 
 def save_jobs(data):
     for title, link in data:
+        official_link = get_official_link(link)
         if not JobPost.objects.filter(title=title).exists():
             JobPost.objects.create(
                 title=title,
                 category="Latest Job",
                 description="Not available",
                 last_date=datetime.today().date(),
-                apply_link=link
+                apply_link=official_link
             )
             print(f"✅ Job saved: {title}")
 
 def save_admit_cards(data):
     for title, link in data:
+        official_link = get_official_link(link)
         if not AdmitCard.objects.filter(title=title).exists():
             AdmitCard.objects.create(
                 title=title,
                 exam_date=None,
-                download_link=link,
+                download_link=official_link,
                 date_published=datetime.today().date(),
                 category="Latest Admit Card"
             )
@@ -86,10 +105,11 @@ def save_admit_cards(data):
 
 def save_results(data):
     for title, link in data:
+        official_link = get_official_link(link)
         if not Result.objects.filter(title=title).exists():
             Result.objects.create(
                 title=title,
-                result_link=link,
+                result_link=official_link,
                 result_date=datetime.today().date(),
                 category="Latest Result"
             )
