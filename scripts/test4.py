@@ -5,9 +5,13 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from datetime import datetime
-import re
+import json
+from dotenv import load_dotenv
 
-# Django setup
+# ✅ Load environment variables from .env file
+load_dotenv()
+
+# ================= Django Setup =================
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rojgar_project.settings")
 django.setup()
@@ -17,10 +21,58 @@ from core.models import JobPost
 BASE_URL = "https://www.rojgarresult.com/"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-# ------------------ HELPERS ------------------
+# ================= Hugging Face Setup =================
+HF_API_KEY = os.getenv("HF_API_KEY")  # ✅ .env file me set karo: HF_API_KEY=your_key
+HF_MODEL = os.getenv("HF_MODEL")  # ✅ Working public model
 
+def process_with_ai(data):
+    """Send scraped job data to Hugging Face for AI cleaning in JSON format."""
+    if not HF_API_KEY:
+        print("⚠️ No Hugging Face API key found in .env. Skipping AI processing.")
+        return data
+
+    prompt = f"""
+    You are a data cleaner. Take the following job details dictionary and clean it up:
+    1. Remove unnecessary whitespace and HTML tags.
+    2. Keep all keys the same.
+    3. Ensure the output is valid JSON.
+
+    Job Data:
+    {json.dumps(data, ensure_ascii=False)}
+
+    Return only cleaned JSON.
+    """
+
+    try:
+        response = requests.post(
+            f"https://api-inference.huggingface.co/models/{HF_MODEL}",
+            headers={"Authorization": f"Bearer {HF_API_KEY}"},
+            json={"inputs": prompt},
+            timeout=60
+        )
+        response.raise_for_status()
+        result = response.json()
+
+        if isinstance(result, list) and len(result) > 0 and "generated_text" in result[0]:
+            cleaned_json = result[0]["generated_text"].strip()
+            try:
+                return json.loads(cleaned_json)
+            except json.JSONDecodeError:
+                print("⚠️ AI returned invalid JSON. Using original data.")
+                return data
+        else:
+            print("⚠️ Unexpected AI response. Using original data.")
+            return data
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"⚠️ HTTP error from Hugging Face: {http_err}")
+        return data
+    except Exception as e:
+        print("⚠️ Hugging Face API error:", e)
+        return data
+
+# ================= Helpers =================
 def fetch_home_links():
-    """Scrape all links from homepage."""
     try:
         res = requests.get(BASE_URL, headers=HEADERS, timeout=10)
         res.raise_for_status()
@@ -30,7 +82,7 @@ def fetch_home_links():
 
     soup = BeautifulSoup(res.content, "html.parser")
     anchors = soup.select("a[href^='https://www.rojgarresult.com/']")
-    
+
     links = []
     for a in anchors:
         title = " ".join(a.get_text(strip=True).split())
@@ -43,28 +95,7 @@ def filter_jobs(links):
     job_keywords = ["recruitment", "online form", "vacancy"]
     return [(t, l) for t, l in links if any(k in t.lower() for k in job_keywords)]
 
-# ------------------ CLEANING FUNCTION ------------------
-
-def clean_eligibility(text):
-    """Clean and deduplicate eligibility content."""
-    if not text:
-        return ""
-    # Remove extra spaces
-    text = re.sub(r'\s+', ' ', text)
-    # Remove repeated 'Read the Notification'
-    text = re.sub(r'(Read the Notification\.?)+', 'Read the Notification.', text, flags=re.IGNORECASE)
-    # Remove exact duplicate sentences
-    sentences = []
-    for sentence in text.split('. '):
-        sentence = sentence.strip()
-        if sentence and sentence not in sentences:
-            sentences.append(sentence)
-    return '. '.join(sentences).strip()
-
-# ------------------ JOB DETAIL SCRAPER ------------------
-
 def scrape_job_details(link):
-    """Scrape details from a single job page."""
     try:
         res = requests.get(link, headers=HEADERS, timeout=10)
         res.raise_for_status()
@@ -91,7 +122,6 @@ def scrape_job_details(link):
         "updated_date": None
     }
 
-    # ===== META TAGS =====
     meta_title = soup.find("meta", property="og:title")
     if meta_title and meta_title.get("content"):
         details["title"] = meta_title["content"]
@@ -108,7 +138,7 @@ def scrape_job_details(link):
 
     meta_img = soup.find("meta", property="og:image")
     if meta_img and meta_img.get("content"):
-        details["image_url"] = meta_img["content"]
+        details["image_url"] = meta_img.get("content")
 
     publish_date = soup.find("meta", property="article:published_time")
     if publish_date and publish_date.get("content"):
@@ -118,12 +148,10 @@ def scrape_job_details(link):
     if updated_date and updated_date.get("content"):
         details["updated_date"] = updated_date["content"]
 
-    # ===== TABLE / TEXT DATA =====
     for row in soup.find_all(["tr", "p"]):
         text = row.get_text(" ", strip=True).lower()
         if "eligibility" in text:
-            raw_eligibility = row.get_text(" ", strip=True)
-            details["eligibility"] += clean_eligibility(raw_eligibility) + "\n"
+            details["eligibility"] += row.get_text(" ", strip=True) + "\n"
         elif "how to apply" in text:
             details["how_to_apply"] += row.get_text(" ", strip=True) + "\n"
         elif "important link" in text:
@@ -137,14 +165,11 @@ def scrape_job_details(link):
         elif "total post" in text:
             details["total_posts"] += row.get_text(" ", strip=True) + "\n"
 
-    # ===== APPLY LINK =====
     apply_anchor = soup.find("a", string=lambda s: s and "apply" in s.lower())
     if apply_anchor and apply_anchor.get("href"):
         details["apply_link"] = urljoin(link, apply_anchor["href"])
 
     return details
-
-# ------------------ SAVE ------------------
 
 def save_job_details(details):
     if not details:
@@ -172,8 +197,7 @@ def save_job_details(details):
     else:
         print(f"⏩ Job already exists: {details['title']}")
 
-# ------------------ MAIN ------------------
-
+# ================= Main =================
 if __name__ == "__main__":
     all_links = fetch_home_links()
     jobs = filter_jobs(all_links)
@@ -185,9 +209,9 @@ if __name__ == "__main__":
         print(f"📄 Scraping: {title}")
         details = scrape_job_details(link)
         if details:
+            details = process_with_ai(details)
             job_data_list.append(details)
 
-    # Preview first
     for idx, job in enumerate(job_data_list, start=1):
         print(f"\n=== JOB {idx} ===")
         for k, v in job.items():
